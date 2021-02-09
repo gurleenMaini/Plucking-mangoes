@@ -3,6 +3,11 @@ const Engine = Matter.Engine;
 const World = Matter.World;
 const Bodies = Matter.Bodies;
 const Body = Matter.Body;
+const Constraint = Matter.Constraint;
+
+var boy, tree, rock;
+var platform;
+var mangoes=[];
 
 function preload()
 {
@@ -10,23 +15,19 @@ function preload()
 }
 
 function setup() {
-	createCanvas(800, 700);
+	createCanvas(1400, 600);
 
 
 	engine = Engine.create();
 	world = engine.world;
 
-	
-	ground = new Ground(400,700,800,100);
-	tree = new Tree(700,400);
-	stone = new Stone(100,350,50,50);
-	mango1 = new Mango(700,700);
-	mango2 = new Mango(790,450);
-	mango3 = new Mango(660,710);
-	mango4 = new Mango(750,700);
-	mango5 = new Mango(600,750);
+	boy = new Boy (250,700,170,230)
+	tree = new Tree (1100,900,530,600)
+	rock = new Stone (200, 500, 50)
+	platform = new Ground (800,600,1600,50)
+	launcher = new Launcher(rock.body,{x:200, y: 470});
+	createMangoes(10)
 
-	slingShot = new SlingShot(stone.body, {x:200,y:350})
 	Engine.run(engine);
   
 }
@@ -34,38 +35,50 @@ function setup() {
 
 function draw() {
   rectMode(CENTER);
-  background(0);
-  
-  ground.display();
-  tree.display();
+  background("white");
 
-  mango1.display();
-  mango2.display();
-  mango3.display();
-  mango4.display();
-  mango5.display();
+  boy.display()
+  tree.display()
+  platform.display()
+  rock.display()
+  launcher.display() 
 
-  keyPressed();
-  drawSprites();
- 
+  for(i=0;i<mangoes.length;i++){
+	  mangoes[i].display()
+	  detectCollision(mangoes[i],rock)
+  }
+
 }
 
 function mouseDragged(){
-    Matter.Body.setPosition(stone.body, {x: mouseX , y: mouseY});
+	Matter.Body.setPosition(rock.body, {x:mouseX, y:mouseY})
 }
-
 
 function mouseReleased(){
-    slingShot.fly();
+	launcher.fly()
+}	
+
+function detectCollision(m,s){
+	mangoPosition=m.body.position;
+	stonePosition=s.body.position;
+
+	d= dist(mangoPosition.x, mangoPosition.y, stonePosition.x, stonePosition.y);
+	if(d<=m.r+s.r){
+		Body.setStatic(m.body, false)
+	}
 }
 
-function keyPressed()
-{
-    if(keyCode == 32)
-    {
-        slingShot.attach(stone.body);
-    }
+function createMangoes(n){
+	for (i=0;i<n;i++){
+		randX=random(900,1300);
+		randY=random(150,250);
+		mangoes[i]=new Mango (randX, randY, 30);
+	}
 }
 
-
-
+function keyPressed(){
+	if (keyCode === 32){
+		Body.setPosition(rock.body,{x:200,y:500});
+		launcher.attach(rock.body);
+	}
+}
