@@ -1,32 +1,45 @@
-
 const Engine = Matter.Engine;
 const World = Matter.World;
 const Bodies = Matter.Bodies;
 const Body = Matter.Body;
-const Constraint = Matter.Constraint;
+const Constraint=Matter.Constraint;
 
-var boy, tree, rock;
-var platform;
-var mangoes=[];
+var ground,tree;
+var stone;
+var boyImage,boy;
+var launcher;
+var mango1,mango2,mango3,mango4,mango5;
+var score = 0;
+var totalAttempts = 0;
 
-function preload()
-{
-	
+function preload(){
+
+ boyImage=loadImage("boy.png");	
 }
 
 function setup() {
-	createCanvas(1400, 600);
+	createCanvas(800, 700);
 
 
 	engine = Engine.create();
 	world = engine.world;
 
-	boy = new Boy (250,700,170,230)
-	tree = new Tree (1100,900,530,600)
-	rock = new Stone (200, 500, 50)
-	platform = new Ground (800,600,1600,50)
-	launcher = new Launcher(rock.body,{x:200, y: 470});
-	createMangoes(10)
+    ground=new Ground(600,height,1200,20);
+    tree=new Tree(590,700);
+
+	stone=new Stone(150,300,20,20);
+
+	boy=createSprite(185,647,10,10);
+	boy.addImage(boyImage);
+	boy.scale=0.08;
+	
+	mango1=new Mango(500,350,20);
+	mango2=new Mango(530,230,20);
+	mango3=new Mango(650,370,20);
+	mango4=new Mango(600,300,20);
+	mango5=new Mango(690,280,20);
+
+    launcher=new Launcher(stone.body,{x:140,y:600});
 
 	Engine.run(engine);
   
@@ -35,50 +48,84 @@ function setup() {
 
 function draw() {
   rectMode(CENTER);
-  background("white");
+  background("lightblue");
+  
+  textSize(25);
+  fill ("red");
+  text("Missed the target? Press space to play again ",100 ,110);
 
-  boy.display()
-  tree.display()
-  platform.display()
-  rock.display()
-  launcher.display() 
+  textSize(20);
+  fill ("green");
+  text("SCORE:" + score, 0,200);
 
-  for(i=0;i<mangoes.length;i++){
-	  mangoes[i].display()
-	  detectCollision(mangoes[i],rock)
-  }
+  textSize(15);
+  fill ("red");
+  text("Total Attempts :"+ totalAttempts, 10,300);
+  
+ ground.display();
+ tree.display();
+ mango1.display();
+ mango2.display();
+ mango3.display();
+ mango4.display();
+ mango5.display();
 
+ launcher.display();
+ stone.display();
+
+ detectCollision(stone,mango1);
+ detectCollision(stone,mango2);
+ detectCollision(stone,mango3);
+ detectCollision(stone,mango4);
+ detectCollision(stone,mango5);
+
+
+ drawSprites();
+ 
 }
 
 function mouseDragged(){
-	Matter.Body.setPosition(rock.body, {x:mouseX, y:mouseY})
+    Matter.Body.setPosition(stone.body,{x:mouseX,y:mouseY});
+
 }
 
 function mouseReleased(){
-	launcher.fly()
-}	
-
-function detectCollision(m,s){
-	mangoPosition=m.body.position;
-	stonePosition=s.body.position;
-
-	d= dist(mangoPosition.x, mangoPosition.y, stonePosition.x, stonePosition.y);
-	if(d<=m.r+s.r){
-		Body.setStatic(m.body, false)
-	}
+    launcher.fly();
 }
 
-function createMangoes(n){
-	for (i=0;i<n;i++){
-		randX=random(900,1300);
-		randY=random(150,250);
-		mangoes[i]=new Mango (randX, randY, 30);
-	}
+function detectCollision(lstone,lmango){
+ mangoBodyPosition=lmango.body.position
+ stoneBodyPosition=lstone.body.position
+ score = score + 0.006;
+ 
+ var distance=dist(stoneBodyPosition.x,stoneBodyPosition.y,mangoBodyPosition.x,mangoBodyPosition.y)
+   if(distance<=lmango.r+lstone.r){
+	   Matter.Body.setStatic(lmango.body,false);
+	   
+   }
+   
 }
 
 function keyPressed(){
-	if (keyCode === 32){
-		Body.setPosition(rock.body,{x:200,y:500});
-		launcher.attach(rock.body);
+	if(keyCode===32){
+		Matter.Body.setPosition(stone.body,{x:235,y:420})
+		launcher.attach(stone.body);
+		totalAttempts = totalAttempts+1;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
